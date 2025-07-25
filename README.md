@@ -1,2 +1,3 @@
-# Scratch-project-downloader
-一个可以在任何编程社区盗作的工具
+# 盗作神器
+一个可以在任何编程社区盗作的工具  
+[使用教程](https://kdocs.cn/l/ciSQezkWQRic)
