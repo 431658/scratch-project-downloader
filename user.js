@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         盗作神器pro
-// @version      1.1.1
+// @version      1.1.2
 // @description  可以在任何社区盗作的工具
 // @match        https://scratch.mit.edu/*
 // @match        https://gonfunko.github.io/scratch-gui/*
@@ -18,7 +18,7 @@
 // @match        https://editor.turbowarp.cn/*
 // @match        https://0832.ink/rc/*
 // @match        https://studio.penguinmod.com/*
-// @author       不想上学 博士
+// @author       不想上学、博士
 // @grant        GM_addStyle
 // @run-at       document-start
 // ==/UserScript==
