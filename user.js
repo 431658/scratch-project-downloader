@@ -23,13 +23,13 @@
 // @run-at       document-start
 // ==/UserScript==
 
-(function(){
+(function () {
     'use strict';
 
-    function addStyle(style){
-        const elem=document.createElement("style");
-        elem.textContent=style;
-        document.body.appendChild(elem);
+    function addStyle(style) {
+        const elem = document.createElement("style");
+        elem.textContent = style;
+        document.documentElement.appendChild(elem);
     }
     // 添加UI样式
     addStyle(`
@@ -74,14 +74,14 @@
         }
     `);
 
-    const sleep=time=>new Promise(resolve=>setTimeout(resolve, time));
+    const sleep = time => new Promise(resolve => setTimeout(resolve, time));
     function patch(obj, p, fn) {
         if (obj[p]) obj[p] = fn(obj[p]);
     }
     // 获取vm
-    let VMdetected=null;
+    let VMdetected = null;
     function trap(resolve, reject) {
-        setTimeout(()=>reject(new Error("Timeout")), 15000);
+        setTimeout(() => reject(new Error("Timeout")), 15000);
         patch(Function.prototype, 'bind', _bind => {
             return function (self2, ...args) {
                 if (
@@ -98,11 +98,11 @@
             };
         });
     }
-    function checkVM(){
+    function checkVM() {
         // 如果有iframe，读取iframe的vm
-        if(window.project.vm!==vm) return vm=window.project.vm;
+        if (window.project.vm !== vm) return vm = window.project.vm;
     }
-    function download(blob, name){
+    function download(blob, name) {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.download = name;
@@ -111,76 +111,76 @@
         URL.revokeObjectURL(url);
     }
     console.log("正在获取vm");
-    let vm=window.eureka?.vm ? Promise.resolve(eureka.vm) : new Promise(trap);
-    vm.then((vm)=>{
-        console.log(window.eureka?.vm ? "已通过eureka获取vm": "已获取vm", vm); // 兼容eureka
+    let vm = window.eureka?.vm ? Promise.resolve(eureka.vm) : new Promise(trap);
+    vm.then((vm) => {
+        console.log(window.eureka?.vm ? "已通过eureka获取vm" : "已获取vm", vm); // 兼容eureka
         // 有些社区(如40code)的作品在iframe里
-        if(window.parent?.project) window.parent.project.vm=Promise.resolve(vm);
-        VMdetected=vm;
-    }).catch((e)=>{
-        if(!checkVM()) console.log("获取vm失败", e);
+        if (window.parent?.project) window.parent.project.vm = Promise.resolve(vm);
+        VMdetected = vm;
+    }).catch((e) => {
+        if (!checkVM()) console.log("获取vm失败", e);
     });
-    async function saveProject(){
-        try{
+    async function saveProject() {
+        try {
             checkVM();
-            const VMdetected=await vm;
+            const VMdetected = await vm;
             console.log("正在保存作品");
-            let blob=await VMdetected.saveProjectSb3();
+            let blob = await VMdetected.saveProjectSb3();
             console.log("已保存作品", blob);
-            let name=prompt("输入文件名", "Project.sb3");
-            if(!name) return;
+            let name = prompt("输入文件名", "Project.sb3");
+            if (!name) return;
             download(blob, name);
         }
-        catch(e){
+        catch (e) {
             console.log("错误", e);
             throw e;
         }
     }
-    async function saveSprite(){
-        try{
+    async function saveSprite() {
+        try {
             checkVM();
-            const VMdetected=await vm;
+            const VMdetected = await vm;
             console.log("正在保存角色");
-            for(let target of VMdetected.runtime.targets){
-                await VMdetected.exportSprite(target.id).then(blob=>download(blob, (target.isStage ? "舞台_" : "角色_")+target.getName()+".sprite3"));
+            for (let target of VMdetected.runtime.targets) {
+                await VMdetected.exportSprite(target.id).then(blob => download(blob, (target.isStage ? "舞台_" : "角色_") + target.getName() + ".sprite3"));
                 await sleep(1000);
             }
         }
-        catch(e){
+        catch (e) {
             console.log("错误", e);
             throw e;
         }
     }
-    function patchXHR(){
-        function modifyData(data){
-            data.body.forEveryone=true;
-            data.body.status="PUBLISHED";
-            data.body.isOpenSource=true;
-            data.body.sourceOpenLevel="PUBLIC";
-            data.body.title+="(开源)";
+    function patchXHR() {
+        function modifyData(data) {
+            data.body.forEveryone = true;
+            data.body.status = "PUBLISHED";
+            data.body.isOpenSource = true;
+            data.body.sourceOpenLevel = "PUBLIC";
+            data.body.title += "(开源)";
             return data;
         }
-        patch(window, "XMLHttpRequest", originalXHR=>function() {
+        patch(window, "XMLHttpRequest", originalXHR => function () {
             const realXHR = new originalXHR();
-            const self=this;
+            const self = this;
             // 重写open方法
-            this.open = function(method, url, async, user, password) {
+            this.open = function (method, url, async, user, password) {
                 realXHR.open(...arguments);
             };
-        
+
             // 重写send方法
-            this.send = function(body) {
+            this.send = function (body) {
                 realXHR.send(body);
-                realXHR.onreadystatechange = function() {
+                realXHR.onreadystatechange = function () {
                     if (realXHR.readyState === 4) { // 请求完成
                         if (realXHR.status === 200) { // 成功响应
                             // 修改响应数据
                             self.responseText = (
-                                realXHR.__sentry_xhr__.url="https://community-web.ccw.site/creation/detail" ?
-                                JSON.stringify(
-                                    modifyData(JSON.parse(realXHR.responseText))
-                                ) :
-                                realXHR.responseText
+                                realXHR.__sentry_xhr__.url = "https://community-web.ccw.site/creation/detail" ?
+                                    JSON.stringify(
+                                        modifyData(JSON.parse(realXHR.responseText))
+                                    ) :
+                                    realXHR.responseText
                             );
                             // 触发onload事件（如果有的话）
                             if (self.onload) {
@@ -247,8 +247,8 @@
             isDragging = false;
             toolbar.style.cursor = 'grab';
         });
-        
-        const openButton = document.createElement('button');
+
+        const openButton = document.createElement('div'); // button会被反CSense检查出来
         openButton.style.position = 'fixed';
         openButton.style.bottom = '20px';
         openButton.style.right = '60px';
@@ -263,15 +263,15 @@
         openButton.style.borderRadius = '50%';
         openButton.style.background = '#d3d3d3';
         openButton.textContent = '盗作';
-        openButton.addEventListener("mouseover", ()=>{
-            if(openButton.textContent=="错误") return;
-            openButton.textContent=VMdetected ? "打开" : "获取vm";
+        openButton.addEventListener("mouseover", () => {
+            if (openButton.textContent == "错误") return;
+            openButton.textContent = VMdetected ? "打开" : "获取vm";
         });
-        openButton.addEventListener("mouseleave", ()=>{
-            if(openButton.textContent=="错误") return;
-            openButton.textContent=VMdetected ? "盗作" : "稍等";
+        openButton.addEventListener("mouseleave", () => {
+            if (openButton.textContent == "错误") return;
+            openButton.textContent = VMdetected ? "盗作" : "稍等";
         });
-        
+
         // 允许移动按钮
         let isDraggingButton = false;
         openButton.addEventListener('mousedown', e => {
@@ -280,41 +280,41 @@
             const rect = openButton.getBoundingClientRect();
             offsetX = e.clientX - rect.left;
             offsetY = e.clientY - rect.top;
-            
+
             // 防止文本选中和默认行为
             e.preventDefault();
         });
 
         document.addEventListener('mousemove', e => {
             if (!isDraggingButton) return;
-            
+
             // 更新按钮位置
             openButton.style.left = (e.clientX - offsetX) + 'px';
             openButton.style.top = (e.clientY - offsetY) + 'px';
         });
 
         document.addEventListener('mouseup', e => {
-            isDraggingButton=false;
+            isDraggingButton = false;
         });
         document.documentElement.appendChild(openButton);
-        openButton.textContent="稍等";
+        openButton.textContent = "稍等";
         checkVM();
-        vm.then(VMdetected=>{
-            openButton.textContent="盗作";
+        vm.then(VMdetected => {
+            openButton.textContent = "盗作";
             openButton.style.background = 'linear-gradient(45deg, #00ff00, #00ffbd)';
-            openButton.addEventListener("click", async ()=>{
+            openButton.addEventListener("click", async () => {
                 toolbar.style.display = '';
                 openButton.style.display = 'none';
             });
-        }).catch(e=>{
-            openButton.textContent="错误";
+        }).catch(e => {
+            openButton.textContent = "错误";
             openButton.style.background = 'linear-gradient(45deg, #ff0000, #ff7600)';
-            openButton.addEventListener("click", async ()=>{
+            openButton.addEventListener("click", async () => {
                 alert("错误，看控制台");
             });
         });
     }
-    window.project={patch, vm, trap, saveProject, saveSprite, VMdetected, patchXHR};
+    window.project = { patch, vm, trap, saveProject, saveSprite, VMdetected, patchXHR };
     createUI();
     // patchXHR();
 })();
