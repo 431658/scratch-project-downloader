@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         盗作神器pro
-// @version      1.1.4
+// @version      1.1.5
 // @description  可以在任何社区盗作的工具
 // @match        https://scratch.mit.edu/*
 // @match        https://gonfunko.github.io/scratch-gui/*
@@ -143,9 +143,32 @@
             checkVM();
             const VMdetected = await vm;
             console.log("正在保存角色");
+            let all=[];
             for (let target of VMdetected.runtime.targets) {
-                await VMdetected.exportSprite(target.id).then(blob => download(blob, (target.isStage ? "舞台_" : "角色_") + target.getName() + ".sprite3"));
-                await sleep(1000);
+                all.push({
+                    blob: await VMdetected.exportSprite(target.id),
+                    name: (target.isStage ? "舞台_" : "角色_") + target.getName() + ".sprite3",
+                });
+            }
+            if(confirm("是否压缩为zip？")){
+                const JSZip = VMdetected.exports.JSZip;
+                const zip = new JSZip();
+                for(let {blob, name} of all){
+                    zip.file(name, blob);
+                }
+                zip.file("Project.sb3", await VMdetected.saveProjectSb3());
+                let name = prompt("输入文件名", "Project.zip");
+                if (!name) return;
+                download(await zip.generateAsync({
+                    type: "blob",
+                    compression: "DEFLATE",          // 启用压缩
+                    compressionOptions: { level: 5 } // 压缩级别
+                }), name);
+            }
+            else{
+                for(let {blob, name} of all){
+                     download(blob, name);
+                }
             }
         }
         catch (e) {
