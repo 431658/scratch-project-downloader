@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         盗作神器pro
-// @version      1.2.0
+// @version      1.2.1
 // @description  可以在任何社区盗作的工具
 // @match        https://scratch.mit.edu/*
 // @match        https://gonfunko.github.io/scratch-gui/*
@@ -169,6 +169,8 @@
         // 有些社区(如40code)的作品在iframe里
         if (window.parent?.project) window.parent.project.vm = Promise.resolve(vm);
         VMdetected = vm;
+        globalThis.vm = vm;
+        globalThis.Function().bind(vm);
     }).catch((e) => {
         if (!checkVM()) console.log("获取vm失败", e);
     });
@@ -338,7 +340,6 @@
         openButton.style.height = '50px';
         openButton.style.borderRadius = '50%';
         openButton.style.background = '#d3d3d3';
-        // openButton.title = '编程社区脆弱性的根本证明。';
         openButton.textContent = '盗作';
         openButton.addEventListener("mouseover", () => {
             if (openButton.textContent == "错误") return;
@@ -391,7 +392,17 @@
             });
         });
     }
-    window.project = { patch, vm, getVM, trapViaBind, getReduxStoreFromDOM, saveProject, saveSprite, VMdetected, patchXHR };
+    window.project = {
+        patch,
+        vm,
+        getVM,
+        trapViaBind,
+        getReduxStoreFromDOM,
+        saveProject,
+        saveSprite,
+        VMdetected,
+        patchXHR
+    };
     createUI();
     // patchXHR();
 })();
