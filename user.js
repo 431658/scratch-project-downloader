@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         盗作神器pro
-// @version      1.1.5
+// @version      1.2.0
 // @description  可以在任何社区盗作的工具
 // @match        https://scratch.mit.edu/*
 // @match        https://gonfunko.github.io/scratch-gui/*
@@ -18,6 +18,7 @@
 // @match        https://editor.turbowarp.cn/*
 // @match        https://0832.ink/rc/*
 // @match        https://studio.penguinmod.com/*
+// @match        https://codinghou.cn/*
 // @author       不想上学、博士
 // @updateURL    https://github.com/431658/scratch-project-downloader/releases/latest/download/user.js
 // @downloadURL  https://github.com/431658/scratch-project-downloader/releases/latest/download/user.js
@@ -82,23 +83,72 @@
     }
     // 获取vm
     let VMdetected = null;
-    function trap(resolve, reject) {
-        setTimeout(() => reject(new Error("Timeout")), 15000);
-        patch(Function.prototype, 'bind', _bind => {
-            return function (self2, ...args) {
-                if (
-                    typeof self2 === 'object' &&
-                    self2 !== null &&
-                    Object.prototype.hasOwnProperty.call(self2, 'editingTarget') &&
-                    Object.prototype.hasOwnProperty.call(self2, 'runtime')
-                ) {
-                    Function.prototype.bind = _bind;
-                    resolve(self2);
+    async function getVM(){
+        if(document.readyState == 'complete'){
+            return getReduxStoreFromDOM()?.getState()?.scratchGui?.vm;
+        }
+        else{
+            return await trapViaBind();
+        }
+    }
+    function trapViaBind() {
+        return new Promise((resolve, reject)=>{
+            setTimeout(() => reject(new Error("Timeout")), 15000);
+            patch(Function.prototype, 'bind', _bind => {
+                return function (self2, ...args) {
+                    if (
+                        typeof self2 === 'object' &&
+                        self2 !== null &&
+                        Object.prototype.hasOwnProperty.call(self2, 'editingTarget') &&
+                        Object.prototype.hasOwnProperty.call(self2, 'runtime')
+                    ) {
+                        Function.prototype.bind = _bind;
+                        resolve(self2);
+                        return _bind.call(this, self2, ...args);
+                    }
                     return _bind.call(this, self2, ...args);
-                }
-                return _bind.call(this, self2, ...args);
-            };
+                };
+            });
         });
+    }
+    function getReduxStoreFromDOM(){
+        const internalRoots = Array.from(document.querySelectorAll('*')).map(el => {
+            const key = Object.keys(el).filter(keyName => keyName.includes('__reactContainer')).at(-1);
+            return el[key];
+        }).filter(key => key);
+    
+        for (const root of internalRoots) {
+            const seen = new Map();
+            const stores = new Set();
+            
+            const search = obj => {
+                if (seen.has(obj)) {
+                    return;
+                }
+                seen.set(obj, true);
+                
+                for (const name in obj) {
+                    if (name === 'getState') {
+                        const store = obj;
+                        const state = store.getState();
+                        if (state?.scratchGui?.vm && state.scratchPaint && state.locales) {
+                            return store; // Found target store
+                        }
+                        stores.add(obj);
+                    }
+    
+                    // eslint-disable-next-line no-prototype-builtins
+                    if ((obj?.hasOwnProperty?.(name)) && (typeof obj[name] === 'object') && (obj[name] !== null)) {
+                        const result = search(obj[name]);
+                        if (result) return result; // Propagate found store
+                    }
+                }
+            };
+    
+            const result = search(root);
+            if (result) return result;
+        }
+        return null;
     }
     function checkVM() {
         // 如果有iframe，读取iframe的vm
@@ -113,7 +163,7 @@
         URL.revokeObjectURL(url);
     }
     console.log("正在获取vm");
-    let vm = window.eureka?.vm ? Promise.resolve(eureka.vm) : new Promise(trap);
+    let vm = window.eureka?.vm ? Promise.resolve(eureka.vm) : getVM();
     vm.then((vm) => {
         console.log(window.eureka?.vm ? "已通过eureka获取vm" : "已获取vm", vm); // 兼容eureka
         // 有些社区(如40code)的作品在iframe里
@@ -168,6 +218,7 @@
             else{
                 for(let {blob, name} of all){
                      download(blob, name);
+                     await sleep(1000);
                 }
             }
         }
@@ -287,7 +338,7 @@
         openButton.style.height = '50px';
         openButton.style.borderRadius = '50%';
         openButton.style.background = '#d3d3d3';
-        openButton.title = '编程社区脆弱性的根本证明。';
+        // openButton.title = '编程社区脆弱性的根本证明。';
         openButton.textContent = '盗作';
         openButton.addEventListener("mouseover", () => {
             if (openButton.textContent == "错误") return;
@@ -340,7 +391,7 @@
             });
         });
     }
-    window.project = { patch, vm, trap, saveProject, saveSprite, VMdetected, patchXHR };
+    window.project = { patch, vm, getVM, trapViaBind, getReduxStoreFromDOM, saveProject, saveSprite, VMdetected, patchXHR };
     createUI();
     // patchXHR();
 })();
