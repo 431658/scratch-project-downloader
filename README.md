@@ -6,3 +6,4 @@
 ## 反对此工具的人
 点击图片可查看对方主页链接
 [![](https://github.com/user-attachments/assets/45ea90d0-3392-4cdd-906a-5d3ecc16b649)](https://www.ccw.site/student/67d536733778fc282d63308e)
+[![](https://gpo.saobby.com/i/3LCHdcOarKNy4G6h.jpg)](https://www.ccw.site/student/6788a5c73778fc282d624110)
