@@ -20,8 +20,8 @@
 // @match        https://studio.penguinmod.com/*
 // @match        https://codinghou.cn/*
 // @author       不想上学、博士
-// @updateURL    https://github.com/431658/scratch-project-downloader/releases/latest/download/user.js
-// @downloadURL  https://github.com/431658/scratch-project-downloader/releases/latest/download/user.js
+// @updateURL    https://bgithub.xyz/431658/scratch-project-downloader/releases/latest/download/user.js
+// @downloadURL  https://bgithub.xyz/431658/scratch-project-downloader/releases/latest/download/user.js
 // @grant        GM_addStyle
 // @run-at       document-start
 // ==/UserScript==
@@ -83,16 +83,16 @@
     }
     // 获取vm
     let VMdetected = null;
-    async function getVM(){
-        if(document.readyState == 'complete'){
+    async function getVM() {
+        if (document.readyState == 'complete') {
             return getReduxStoreFromDOM()?.getState()?.scratchGui?.vm;
         }
-        else{
+        else {
             return await trapViaBind();
         }
     }
     function trapViaBind() {
-        return new Promise((resolve, reject)=>{
+        return new Promise((resolve, reject) => {
             setTimeout(() => reject(new Error("Timeout")), 15000);
             patch(Function.prototype, 'bind', _bind => {
                 return function (self2, ...args) {
@@ -111,22 +111,22 @@
             });
         });
     }
-    function getReduxStoreFromDOM(){
+    function getReduxStoreFromDOM() {
         const internalRoots = Array.from(document.querySelectorAll('*')).map(el => {
             const key = Object.keys(el).filter(keyName => keyName.includes('__reactContainer')).at(-1);
             return el[key];
         }).filter(key => key);
-    
+
         for (const root of internalRoots) {
             const seen = new Map();
             const stores = new Set();
-            
+
             const search = obj => {
                 if (seen.has(obj)) {
                     return;
                 }
                 seen.set(obj, true);
-                
+
                 for (const name in obj) {
                     if (name === 'getState') {
                         const store = obj;
@@ -136,7 +136,7 @@
                         }
                         stores.add(obj);
                     }
-    
+
                     // eslint-disable-next-line no-prototype-builtins
                     if ((obj?.hasOwnProperty?.(name)) && (typeof obj[name] === 'object') && (obj[name] !== null)) {
                         const result = search(obj[name]);
@@ -144,7 +144,7 @@
                     }
                 }
             };
-    
+
             const result = search(root);
             if (result) return result;
         }
@@ -195,17 +195,17 @@
             checkVM();
             const VMdetected = await vm;
             console.log("正在保存角色");
-            let all=[];
+            let all = [];
             for (let target of VMdetected.runtime.targets) {
                 all.push({
                     blob: await VMdetected.exportSprite(target.id),
                     name: (target.isStage ? "舞台_" : "角色_") + target.getName() + ".sprite3",
                 });
             }
-            if(confirm("是否压缩为zip？")){
+            if (confirm("是否压缩为zip？")) {
                 const JSZip = VMdetected.exports.JSZip;
                 const zip = new JSZip();
-                for(let {blob, name} of all){
+                for (let { blob, name } of all) {
                     zip.file(name, blob);
                 }
                 zip.file("Project.sb3", await VMdetected.saveProjectSb3());
@@ -217,10 +217,10 @@
                     compressionOptions: { level: 5 } // 压缩级别
                 }), name);
             }
-            else{
-                for(let {blob, name} of all){
-                     download(blob, name);
-                     await sleep(1000);
+            else {
+                for (let { blob, name } of all) {
+                    download(blob, name);
+                    await sleep(1000);
                 }
             }
         }
