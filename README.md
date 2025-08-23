@@ -9,4 +9,4 @@
 [如果图没加载出来，点这里查看第2个人![](https://github.com/user-attachments/assets/a71e7012-fb3b-4f24-8f7f-6e3e93062ecf)](https://www.ccw.site/student/6788a5c73778fc282d624110)
 ### 就是因为这篇文章导致我被封号！
 [原文](https://learn.ccw.site/article/98607310-5255-4f2a-ac12-29faacd5deaf)
-[备份文章](https://431658.github.io/scratch-project-downloader/备份文章1.html)
+[备份文章](https://431658.github.io/scratch-project-downloader/html/备份文章1.html)
