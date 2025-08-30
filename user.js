@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         盗作神器pro
-// @version      1.2.2
+// @version      1.3.0
 // @description  可以在任何社区盗作的工具
 // @match        https://scratch.mit.edu/*
 // @match        https://gonfunko.github.io/scratch-gui/*
@@ -47,6 +47,7 @@
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
             display: flex;
             flex-direction: column;
+            user-select: none;
             gap: 8px;
         }
         #project-toolbar button {
@@ -202,6 +203,16 @@
                     name: (target.isStage ? "舞台_" : "角色_") + target.getName() + ".sprite3",
                 });
             }
+            async function exportStageAsSprite(stage, _isStage) {
+                stage.isStage = false;
+                all.push({
+                    blob: await VMdetected.exportSprite(target.id),
+                    name: (target.isStage ? "舞台(当做普通角色)_" : "角色_") + target.getName() + ".sprite3",
+                });
+                stage.isStage = _isStage;
+            }
+            const stage = vm.runtime.getTargetForStage();
+            await exportStageAsSprite(stage, stage.isStage);
             if (confirm("是否压缩为zip？")) {
                 const JSZip = VMdetected.exports.JSZip;
                 const zip = new JSZip();
@@ -213,8 +224,8 @@
                 if (!name) return;
                 download(await zip.generateAsync({
                     type: "blob",
-                    compression: "DEFLATE",          // 启用压缩
-                    compressionOptions: { level: 5 } // 压缩级别
+                    compression: "DEFLATE",           // 启用压缩
+                    compressionOptions: { level: 5 }, // 压缩级别
                 }), name);
             }
             else {
@@ -319,6 +330,8 @@
             if (!isDragging) return;
             toolbar.style.left = (e.clientX - offsetX) + 'px';
             toolbar.style.top = (e.clientY - offsetY) + 'px';
+            toolbar.style.right = "auto";
+            toolbar.style.bottom = "auto";
         });
 
         document.addEventListener('mouseup', () => {
