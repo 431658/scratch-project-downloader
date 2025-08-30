@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         盗作神器pro
-// @version      1.3.0
+// @version      1.3.1
 // @description  可以在任何社区盗作的工具
 // @match        https://scratch.mit.edu/*
 // @match        https://gonfunko.github.io/scratch-gui/*
@@ -206,12 +206,12 @@
             async function exportStageAsSprite(stage, _isStage) {
                 stage.isStage = false;
                 all.push({
-                    blob: await VMdetected.exportSprite(target.id),
-                    name: (target.isStage ? "舞台(当做普通角色)_" : "角色_") + target.getName() + ".sprite3",
+                    blob: await VMdetected.exportSprite(stage.id),
+                    name: "舞台(当做普通角色)_" + stage.getName() + ".sprite3",
                 });
                 stage.isStage = _isStage;
             }
-            const stage = vm.runtime.getTargetForStage();
+            const stage = VMdetected.runtime.getTargetForStage();
             await exportStageAsSprite(stage, stage.isStage);
             if (confirm("是否压缩为zip？")) {
                 const JSZip = VMdetected.exports.JSZip;
