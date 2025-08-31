@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         盗作神器pro
-// @version      1.3.1
+// @version      1.3.2
 // @description  可以在任何社区盗作的工具
 // @match        https://scratch.mit.edu/*
 // @match        https://gonfunko.github.io/scratch-gui/*
@@ -26,7 +26,7 @@
 // @run-at       document-start
 // ==/UserScript==
 
-(function () {
+(function (self) {
     'use strict';
 
     function addStyle(style) {
@@ -83,7 +83,7 @@
         if (obj[p]) obj[p] = fn(obj[p]);
     }
     // 获取vm
-    let VMdetected = null;
+    let vm = null;
     async function getVM() {
         if (document.readyState == 'complete') {
             return getReduxStoreFromDOM()?.getState()?.scratchGui?.vm;
@@ -151,10 +151,6 @@
         }
         return null;
     }
-    function checkVM() {
-        // 如果有iframe，读取iframe的vm
-        if (window.project.vm !== vm) return vm = window.project.vm;
-    }
     function download(blob, name) {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -164,23 +160,20 @@
         URL.revokeObjectURL(url);
     }
     console.log("正在获取vm");
-    let vm = window.eureka?.vm ? Promise.resolve(eureka.vm) : getVM();
-    vm.then((vm) => {
-        console.log(window.eureka?.vm ? "已通过eureka获取vm" : "已获取vm", vm); // 兼容eureka
-        // 有些社区(如40code)的作品在iframe里
-        if (window.parent?.project) window.parent.project.vm = Promise.resolve(vm);
-        VMdetected = vm;
-        globalThis.vm = vm;
-        globalThis.Function().bind(vm);
+    let _vm = self.eureka?.vm ? Promise.resolve(eureka.vm) : getVM();
+    _vm.then((vm2) => {
+        console.log(self.eureka?.vm ? "已通过eureka获取vm" : "已获取vm", vm2); // 兼容eureka
+        vm = vm2;
+        self.vm = vm2;
+        self.Function().bind(vm2);
     }).catch((e) => {
-        if (!checkVM()) console.log("获取vm失败", e);
+        console.log("获取vm失败", e);
     });
     async function saveProject() {
         try {
-            checkVM();
-            const VMdetected = await vm;
+            const vm = await _vm;
             console.log("正在保存作品");
-            let blob = await VMdetected.saveProjectSb3();
+            let blob = await vm.saveProjectSb3();
             console.log("已保存作品", blob);
             let name = prompt("输入文件名", "Project.sb3");
             if (!name) return;
@@ -193,33 +186,32 @@
     }
     async function saveSprite() {
         try {
-            checkVM();
-            const VMdetected = await vm;
+            const vm = await _vm;
             console.log("正在保存角色");
             let all = [];
-            for (let target of VMdetected.runtime.targets) {
+            for (let target of vm.runtime.targets) {
                 all.push({
-                    blob: await VMdetected.exportSprite(target.id),
+                    blob: await vm.exportSprite(target.id),
                     name: (target.isStage ? "舞台_" : "角色_") + target.getName() + ".sprite3",
                 });
             }
             async function exportStageAsSprite(stage, _isStage) {
                 stage.isStage = false;
                 all.push({
-                    blob: await VMdetected.exportSprite(stage.id),
+                    blob: await vm.exportSprite(stage.id),
                     name: "舞台(当做普通角色)_" + stage.getName() + ".sprite3",
                 });
                 stage.isStage = _isStage;
             }
-            const stage = VMdetected.runtime.getTargetForStage();
+            const stage = vm.runtime.getTargetForStage();
             await exportStageAsSprite(stage, stage.isStage);
             if (confirm("是否压缩为zip？")) {
-                const JSZip = VMdetected.exports.JSZip;
+                const JSZip = vm.exports.JSZip;
                 const zip = new JSZip();
                 for (let { blob, name } of all) {
                     zip.file(name, blob);
                 }
-                zip.file("Project.sb3", await VMdetected.saveProjectSb3());
+                zip.file("Project.sb3", await vm.saveProjectSb3());
                 let name = prompt("输入文件名", "Project.zip");
                 if (!name) return;
                 download(await zip.generateAsync({
@@ -249,7 +241,7 @@
             data.body.title += "(开源)";
             return data;
         }
-        patch(window, "XMLHttpRequest", originalXHR => function () {
+        patch(self, "XMLHttpRequest", originalXHR => function () {
             const realXHR = new originalXHR();
             const self = this;
             // 重写open方法
@@ -356,11 +348,11 @@
         openButton.textContent = '盗作';
         openButton.addEventListener("mouseover", () => {
             if (openButton.textContent == "错误") return;
-            openButton.textContent = VMdetected ? "打开" : "获取vm";
+            openButton.textContent = vm ? "打开" : "获取vm";
         });
         openButton.addEventListener("mouseleave", () => {
             if (openButton.textContent == "错误") return;
-            openButton.textContent = VMdetected ? "盗作" : "稍等";
+            openButton.textContent = vm ? "盗作" : "稍等";
         });
 
         // 允许移动按钮
@@ -389,8 +381,7 @@
         });
         document.documentElement.appendChild(openButton);
         openButton.textContent = "稍等";
-        checkVM();
-        vm.then(VMdetected => {
+        _vm.then(vm => {
             openButton.textContent = "盗作";
             openButton.style.background = 'linear-gradient(45deg, #00ff00, #00ffbd)';
             openButton.addEventListener("click", async () => {
@@ -405,17 +396,16 @@
             });
         });
     }
-    window.project = {
+    self.project = {
         patch,
-        vm,
+        _vm,
         getVM,
         trapViaBind,
         getReduxStoreFromDOM,
         saveProject,
         saveSprite,
-        VMdetected,
         patchXHR
     };
     createUI();
     // patchXHR();
-})();
+})(typeof unsafeWindow == "undefined" ? typeof globalThis == "undefined" ? typeof window == "undefined" ? this : window : globalThis : unsafeWindow);
