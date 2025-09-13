@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         盗作神器pro
-// @version      1.3.2
+// @version      1.3.3
 // @description  可以在任何社区盗作的工具
 // @match        https://scratch.mit.edu/*
 // @match        https://gonfunko.github.io/scratch-gui/*
@@ -30,6 +30,7 @@
     'use strict';
 
     function addStyle(style) {
+
         const elem = document.createElement("style");
         elem.textContent = style;
         document.documentElement.appendChild(elem);
@@ -47,18 +48,21 @@
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
             display: flex;
             flex-direction: column;
-            user-select: none;
             gap: 8px;
         }
         #project-toolbar button {
             padding: 8px 12px;
             border: none;
             border-radius: 5px;
-            background: #4CAF50;
             color: white;
             cursor: pointer;
             font-size: 14px;
             transition: background 0.3s;
+            user-select: none;
+            margin-top: 5px;
+        }
+        #project-toolbar button {
+            background: #4caf50;
         }
         #project-toolbar button:hover {
             background: #45a049;
@@ -69,12 +73,23 @@
         #project-toolbar button.save-sprite:hover {
             background: #0b7dda;
         }
-        #project-toolbar button.close-btn {
+        #project-toolbar button.hide-btn {
             background: #f44336;
-            margin-top: 5px;
+        }
+        #project-toolbar button.hide-btn:hover {
+            background: #d32f2f;
+        }
+        #project-toolbar button.close-btn {
+            background: #a9f5ff;
         }
         #project-toolbar button.close-btn:hover {
-            background: #d32f2f;
+            background: #90ebf7;
+        }
+        #project-toolbar button.about-btn {
+            background: #ffea00;
+        }
+        #project-toolbar button.about-btn:hover {
+            background: #ffd500ff;
         }
     `);
 
@@ -293,16 +308,33 @@
         saveSpriteBtn.onclick = saveSprite;
 
         const closeBtn = document.createElement('button');
-        closeBtn.textContent = '关闭工具栏';
+        closeBtn.textContent = '退出';
         closeBtn.className = 'close-btn';
         closeBtn.onclick = () => {
+            toolbar.remove();
+            openButton.remove();
+        };
+
+        const hideBtn = document.createElement('button');
+        hideBtn.textContent = '关闭';
+        hideBtn.className = 'hide-btn';
+        hideBtn.onclick = () => {
             toolbar.style.display = 'none';
             openButton.style.display = '';
+        };
+
+        const aboutBtn = document.createElement('button');
+        aboutBtn.textContent = '关于';
+        aboutBtn.className = 'about-btn';
+        aboutBtn.onclick = () => {
+            if (confirm("盗作神器\n一个可以在任何社区盗作的工具\n作者：不想上学\ngithub仓库地址：https://github.com/431658/scratch-project-downloader\n是否打开github仓库地址？")) open("https://github.com/431658/scratch-project-downloader", "_blank");
         };
 
         toolbar.appendChild(saveProjectBtn);
         toolbar.appendChild(saveSpriteBtn);
         toolbar.appendChild(closeBtn);
+        toolbar.appendChild(aboutBtn);
+        toolbar.appendChild(hideBtn);
 
         document.documentElement.appendChild(toolbar);
 
