@@ -1,7 +1,7 @@
 # 盗作神器
 一个可以在任何编程社区盗作的工具  
 [Github](https://github.com/431658/scratch-project-downloader)
-[使用教程](https://kdocs.cn/l/ciSQezkWQRic)
+[使用教程](https://bgithub.xyz/431658/scratch-project-downloader/wiki)
 [下载盗作神器](https://bgithub.xyz/431658/scratch-project-downloader/releases/latest/download/user.js)
 ## 反对此工具的人
 点击图片可查看对方主页链接  
