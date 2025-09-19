@@ -10,3 +10,12 @@
 ### 就是因为这篇文章导致我被封号！
 [原文](https://learn.ccw.site/article/98607310-5255-4f2a-ac12-29faacd5deaf)
 [备份文章](https://431658.github.io/scratch-project-downloader/html/备份文章1.html)
+## 开发者名单
+• 不想上学（主开发者）  
+QQ：864517308  
+微信：jws12301234789huf  
+邮箱：bxsx0@foxmail.com  
+CCW：https://www.ccw.site/student/68821c3d0fffab5209c5a71d  
+40code：https://40code.com/#page=user&id=2912  
+阿尔法营：https://aerfaying.com/Users/1269626  
+• [博士](https://www.ccw.site/student/6446696ccd8f7f766d0cc43f)（部分ui设计）
