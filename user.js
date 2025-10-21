@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         盗作神器pro
-// @version      1.3.3
+// @version      1.3.4
 // @description  可以在任何社区盗作的工具
 // @match        https://scratch.mit.edu/*
 // @match        https://gonfunko.github.io/scratch-gui/*
@@ -22,7 +22,8 @@
 // @author       不想上学、博士
 // @updateURL    https://bgithub.xyz/431658/scratch-project-downloader/releases/latest/download/user.js
 // @downloadURL  https://bgithub.xyz/431658/scratch-project-downloader/releases/latest/download/user.js
-// @grant        GM_addStyle
+// @grant        GM_registerMenuCommand
+// @great        unsafeWindow
 // @run-at       document-start
 // ==/UserScript==
 
@@ -101,7 +102,9 @@
     let vm = null;
     async function getVM() {
         if (document.readyState == 'complete') {
-            return getReduxStoreFromDOM()?.getState()?.scratchGui?.vm;
+            const vm=getReduxStoreFromDOM()?.getState()?.scratchGui?.vm;
+            if(!vm) throw "无法从DOM获取vm";
+            return vm;
         }
         else {
             return await trapViaBind();
@@ -292,7 +295,11 @@
     // 创建UI界面
     function createUI() {
         // 检查是否已存在工具栏
-        if (document.getElementById('project-toolbar')) return;
+        const _toolbar=document.getElementById('project-toolbar');
+        if (_toolbar) {
+            _toolbar.nextElementSibling.remove();
+            _toolbar.remove();
+        };
 
         const toolbar = document.createElement('div');
         toolbar.id = 'project-toolbar';
@@ -363,7 +370,7 @@
             toolbar.style.cursor = 'grab';
         });
 
-        const openButton = document.createElement('div'); // button会被反CSense检查出来
+        const openButton = document.createElement('div');
         openButton.style.position = 'fixed';
         openButton.style.bottom = '20px';
         openButton.style.right = '60px';
@@ -376,6 +383,7 @@
         openButton.style.width = '50px';
         openButton.style.height = '50px';
         openButton.style.borderRadius = '50%';
+        openButton.style.userSelect="none";
         openButton.style.background = '#d3d3d3';
         openButton.textContent = '盗作';
         openButton.addEventListener("mouseover", () => {
@@ -428,6 +436,7 @@
             });
         });
     }
+    if(typeof GM_registerMenuCommand=="function") GM_registerMenuCommand("重新创建UI", createUI);
     self.project = {
         patch,
         _vm,
@@ -436,6 +445,7 @@
         getReduxStoreFromDOM,
         saveProject,
         saveSprite,
+        createUI,
         patchXHR
     };
     createUI();
