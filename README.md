@@ -14,7 +14,7 @@
 • 不想上学（主开发者）  
 QQ：864517308  
 微信：jws12301234789huf  
-邮箱：bxsx0@foxmail.com  
+邮箱：bxsx431658@outlook.com  
 CCW：https://www.ccw.site/student/68821c3d0fffab5209c5a71d  
 40code：https://40code.com/#page=user&id=2912  
 阿尔法营：https://aerfaying.com/Users/1269626  
