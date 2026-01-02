@@ -1,5 +1,6 @@
 # 盗作神器
 一个可以在任何编程社区盗作的工具  
+此工具仅供学习和研究使用，因使用此工具而产生的任何后果均由用户自行承担。  
 [Github](https://github.com/431658/scratch-project-downloader)
 [使用教程](https://bgithub.xyz/431658/scratch-project-downloader/wiki)
 [下载盗作神器](https://bgithub.xyz/431658/scratch-project-downloader/releases/latest/download/user.js)
